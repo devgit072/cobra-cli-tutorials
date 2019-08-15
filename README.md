@@ -3,7 +3,8 @@ Cobra-cli is undisputed tool to create powerfull modern day cli interfaces in Go
 All major companies like Kubernetes, Docker, CockroachDB uses Cobra cli tool to create cli.
 
 <h6>Here are the steps to create cli using Cobra</h6>
-1) go get -u github.com/spf13/cobra/cobra (Will create the cobra executables in $GOPATH/bin)
+1) go get -u github.com/spf13/cobra/cobra (Will create the cobra executables in $GOPATH/bin)  
+
 2) Typical golang organisation of Cobra based cli will look like:
 
   
