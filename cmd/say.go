@@ -1,60 +1,73 @@
-/*
-Copyright © 2019 NAME HERE <EMAIL ADDRESS>
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
 package cmd
 
 import (
 	"fmt"
 	"math/rand"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
 )
 
 // sayCmd represents the say command
-var sayCmd = &cobra.Command{
+var mathFunCmd = &cobra.Command{
 	Use:   "math-fun",
-	Short: "Short: It will if math is fun or not",
+	Short: "It will say if math is fun or not with 50% probability.",
 	Long: `Longer description: It will say if math is fun or not. 
     It will say in random order: 50% of time it is fun and 50% time it is not fun.
 	It will use rand package to calculate that random value.`,
+	// Mention below: Which function you want to call when user issue command: math-fun.
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(isMathFun())
+		err := isMathFun(cmd)
+		if err != nil {
+			fmt.Println(err)
+		}
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(sayCmd)
+	// Add mathFunCmd command in root cli tool i.e cobra-cli-tutorials
+	rootCmd.AddCommand(mathFunCmd)
 
-	// Here you will define your flags and configuration settings.
+	// Add any flags you want to add.
+	// cobra-cli-tutorials math-fun -c=[true|false]
+	// cobra-cli-tutorials math-fun --caps=[true|false]
+	mathFunCmd.PersistentFlags().BoolP("caps", "c", true, "It will control if message printed in small or big caps")
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// sayCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// sayCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	//cobra-cli-tutorials math-fun -a "this is for tutorials"
+	//cobra-cli-tutorials math-fun --append "this is for tutorials"
+	// -a="Hello"   -a "Hello" are equivalent command.
+	mathFunCmd.Flags().StringP("append", "a", "", "Append some message in last")
 }
 
-func isMathFun() string{
+func isMathFun(cmd *cobra.Command) error {
 	rand.Seed(time.Now().UnixNano())
-	val := rand.Intn(10000);
+	var mathVal string
+	val := rand.Intn(10000)
 	if val % 2 == 0 {
-		return "Math is fun"
+		mathVal = "Math is fun"
 	} else {
-		return "Math is NOT fun"
+		mathVal = "Math is NOT fun"
 	}
+	capFlag := cmd.Flag("caps")
+	fmt.Println("Debug:", capFlag.Value)
+	capValue := capFlag.Value.String()
+
+	if capFlag.Value.String() == "" {
+		//do nothing.
+	} else {
+		boolVal,err := strconv.ParseBool(capValue)
+		if err != nil {
+			return fmt.Errorf("Invalid boolean value of %s: %s, Usage: %s", capFlag.Name, capFlag.Value, capFlag.Usage)
+		}
+		if boolVal {
+			mathVal = strings.ToUpper(mathVal)
+		} else {
+			mathVal = strings.ToLower(mathVal)
+		}
+	}
+	mathVal = mathVal + cmd.Flag("append").Value.String()
+	fmt.Println(mathVal)
+	return nil
 }
